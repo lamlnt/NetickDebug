@@ -19,6 +19,12 @@ MonoBehaviour:
     FileName: Assets/Prefabs/PlayerObject.prefab
     GO: {fileID: 4811285243847315171, guid: fa3b896a683dd06409282c73f9fe5d45, type: 3}
     Id: 1
+  - Obj: {fileID: 6955651596532874650, guid: 49503aea7cd06eb4aaf8345025f51114, type: 3}
+    InstanceId: 28966
+    Name: SpawnObject
+    FileName: Assets/Prefabs/SpawnObject.prefab
+    GO: {fileID: 4151592798868318558, guid: 49503aea7cd06eb4aaf8345025f51114, type: 3}
+    Id: 2
   TickRate: 33.333336
   MaxPlayers: 16
   MaxObjects: 512
