@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using Cysharp.Threading.Tasks;
 using Netick;
 using Netick.Unity;
+using SuperMaxim.Messaging;
 using UnityEngine;
 using NetworkPlayer = Netick.NetworkPlayer;
 
@@ -13,6 +14,7 @@ public class GameController : NetworkBehaviour
     [SerializeField] private float _timeReadyToStart;
     [SerializeField] private float _timeFakePlay;
     [SerializeField] private float _timeToDispose;
+    [SerializeField] private int _battleIndex;
     [Networked] protected GameState CurGameState { get; set; }
     [Networked] protected float CurGameTime { get; set; }
     public enum GameState
@@ -22,6 +24,8 @@ public class GameController : NetworkBehaviour
         Play = 2,
         Dispose = 3,
     }
+    
+    public void SetBattleIndex(int index) => _battleIndex = index;
     
     public override void NetworkStart() => Sandbox.Events.OnPlayerConnected += OnPlayerConnected;
 
@@ -52,6 +56,10 @@ public class GameController : NetworkBehaviour
         
         if (CurGameState == GameState.Play)
         {
+            Messenger.Default.Publish(new GameOverPayload()
+            {
+                BattleIndex = _battleIndex
+            });
             CurGameState = GameState.Dispose;
             CurGameTime = _timeToDispose;
             return;
@@ -116,4 +124,10 @@ public class GameController : NetworkBehaviour
             }
         Players.Clear();
     }
+    
+}
+
+public struct GameOverPayload
+{
+    public int BattleIndex;
 }
