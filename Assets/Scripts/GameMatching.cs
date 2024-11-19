@@ -5,9 +5,7 @@ using UnityEngine;
 
 public class GameMatching : NetworkEventsListener
 {
-    [SerializeField] private NetworkObject _networkObject;
     [SerializeField] private Spawner _playerSpawner;
-    [SerializeField] private int _matchPlayerCount = 2;
     private readonly Dictionary<int, NetworkConnection> _networkConnections = new();
 
     public override void OnClientConnected(NetworkSandbox sandbox, NetworkConnection player)
@@ -32,12 +30,4 @@ public class GameMatching : NetworkEventsListener
             return;
         _playerSpawner.SpawnPlayer(client);
     }
-}
-
-public class LocalPlayerInfo
-{
-    [SerializeField] private int _demoPlayerInfoId;
-    [SerializeField] private GameMatching _gameMatching;
-    
-    
 }

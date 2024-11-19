@@ -6,13 +6,33 @@ using SuperMaxim.Messaging;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+[PersistentSingletonConfig(autoInitOnStartup: true, threadSafe: true, timing: InitializationTiming.Immediate)]
 public class Simulator : PersistentSingleton<Simulator>
 {
-    private bool _isSimulating;
+    [SerializeField] private int _loopBattleCount = 10;
+    private bool _isSimulating;    
     private bool _isBattleInProgress;
-    private bool _isBattleComplete;
     private int _currentIndex;
-
+    private bool _isBattleComplete;
+    
+    private void OnGUI()
+    {
+        if (GUI.Button(new Rect(10, 10, 150, 30), "Start Simulator"))
+        {
+            StartSimulation();
+        }
+    }
+    
+    private void Update()
+    {
+        if (!_isSimulating) return;
+        if (_currentIndex >= _loopBattleCount) return;
+        if (_isBattleInProgress) return;  // Don't start new battle if current one is running
+        
+        _isSimulating = false;
+        SimulateNextBattle().Forget();
+    }
+    
     private void OnEnable()
     {
         Messenger.Default.Subscribe<GameOverPayload>(OnGameOver);
@@ -74,6 +94,13 @@ public class Simulator : PersistentSingleton<Simulator>
     private bool IsBattleComplete()
     {
         return _isBattleComplete;
+    }
+    public void StartSimulation()
+    {
+        _currentIndex = 0;
+        _isBattleComplete = false;
+        _isSimulating = true;
+        _isBattleInProgress = false;
     }
 
     private async UniTask CleanBattle()

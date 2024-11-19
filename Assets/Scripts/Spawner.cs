@@ -12,6 +12,7 @@ public class Spawner : NetworkEventsListener
 
     public void SpawnPlayer(NetworkConnection client)
     {
+        Debug.Log($"SpawnPlayer");
         var player = Sandbox.NetworkInstantiate(_playerPrefab.gameObject, Vector3.zero, Quaternion.identity, client);
         client.PlayerObject = player.gameObject;
         if (!player.TryGetComponent<Character>(out var character)) return;
@@ -21,6 +22,7 @@ public class Spawner : NetworkEventsListener
     
     public void SpawnBot()
     {
+        Debug.Log($"SpawnBot");
         var player = Sandbox.NetworkInstantiate(_playerPrefab.gameObject, Vector3.zero, Quaternion.identity);
         if (!player.TryGetComponent<Character>(out var character)) return;
         _gameController.RegisterPlayer(character);

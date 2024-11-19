@@ -1,9 +1,12 @@
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
+using Core.Singleton;
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
 using UnityEngine;
+using AppDomain = System.AppDomain;
 
 namespace Core.Singleton
 {
@@ -44,8 +47,17 @@ namespace Core.Singleton
         // Cache the configuration
         static PersistentSingleton()
         {
-            _config = typeof(T).GetCustomAttribute<PersistentSingletonConfig>() 
-                ?? new PersistentSingletonConfig();
+            Debug.Log($"PersistentSingleton {typeof(T)}");
+            try
+            {
+                _config = typeof(T).GetCustomAttribute<PersistentSingletonConfig>() 
+                          ?? new PersistentSingletonConfig();
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Error getting PersistentSingletonConfig for {typeof(T)}: {e.Message}");
+            }
+
         }
 
         /// <summary>
@@ -179,6 +191,7 @@ namespace Core.Singleton
         /// </summary>
         private static T CreateInstance()
         {
+            Debug.Log($"CreateInstance {typeof(T)}");
             if (_instanceSubject.Value != null)
                 return _instanceSubject.Value;
 
@@ -240,15 +253,6 @@ namespace Core.Singleton
                 throw;
             }
         }
-        
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void AutoInitialize()
-        {
-            if (_config.AutoInitOnStartup)
-            {
-                var _ = Instance; // This will trigger creation and initialization if needed
-            }
-        }
 
         /// <summary>
         /// Unity's Awake callback. Handles singleton instance setup.
@@ -290,6 +294,57 @@ namespace Core.Singleton
         protected virtual void OnApplicationQuit()
         {
             _isQuitting = true;
+        }
+    }
+}
+
+public static class SingletonInitializer
+{
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    public static void InitializeAllSingletons()
+    {
+        Debug.Log("Auto-initializing all marked singletons...");
+
+        // Find all types with the AutoInitializeSingletonAttribute
+        var singletonTypes = AppDomain.CurrentDomain.GetAssemblies()
+            .SelectMany(assembly => assembly.GetTypes())
+            .Where(type => type.IsClass 
+                           && !type.IsAbstract 
+                           && type.GetCustomAttribute<PersistentSingletonConfig>() != null
+                           && type.GetCustomAttribute<PersistentSingletonConfig>().AutoInitOnStartup);
+
+        foreach (var type in singletonTypes)
+        {
+            try
+            {
+                var baseType = type.BaseType;
+                if (baseType == null || !baseType.IsGenericType || baseType.GetGenericTypeDefinition() != typeof(PersistentSingleton<>))
+                {
+                    Debug.LogError($"[Reflection] Type {type} does not derive from PersistentSingleton<>.");
+                    return;
+                }
+
+                // Look for the 'Instance' property in the base class
+                var instanceProperty = baseType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
+
+                if (instanceProperty == null)
+                {
+                    Debug.LogError($"[Reflection] 'Instance' property not found on base type {baseType}");
+                }
+                else
+                {
+                    Debug.Log($"[Reflection] Found 'Instance' property on base type {baseType}");
+                    var instance = instanceProperty.GetValue(null); // Access the singleton instance
+                    Debug.Log($"[Reflection] Singleton of type {type} initialized: {instance}");
+                }
+
+
+                Debug.Log($"Initialized singleton: {type.Name}");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Failed to initialize singleton {type.Name}: {ex}");
+            }
         }
     }
 }

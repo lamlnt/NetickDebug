@@ -12,7 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 2061283162, guid: da78c2c9df60edc4fb5f65b59fa57c41, type: 3}
   m_Name: netickConfig
   m_EditorClassIdentifier: 
-  _Prefabs: []
+  _Prefabs:
+  - Obj: {fileID: 6392370771447029946, guid: fa3b896a683dd06409282c73f9fe5d45, type: 3}
+    InstanceId: 24836
+    Name: PlayerObject
+    FileName: Assets/Prefabs/PlayerObject.prefab
+    GO: {fileID: 4811285243847315171, guid: fa3b896a683dd06409282c73f9fe5d45, type: 3}
+    Id: 1
   TickRate: 33.333336
   MaxPlayers: 16
   MaxObjects: 512
@@ -23,7 +29,7 @@ MonoBehaviour:
   ServerDivisor: 1
   ClientDivisor: 1
   PhysicsPrediction: 0
-  PhysicsType: 1
+  PhysicsType: 2
   InvokeRenderInHeadless: 0
   InvokeUpdate: 1
   RenderInvokeOrder: 1

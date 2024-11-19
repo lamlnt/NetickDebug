@@ -15,8 +15,8 @@ public class GameController : NetworkBehaviour
     [SerializeField] private float _timeFakePlay;
     [SerializeField] private float _timeToDispose;
     [SerializeField] private int _battleIndex;
-    [Networked] protected GameState CurGameState { get; set; }
-    [Networked] protected float CurGameTime { get; set; }
+    [Networked] public GameState CurGameState { get; set; }
+    [Networked] public float CurGameTime { get; set; }
     public enum GameState
     {
         None = 0,
@@ -33,8 +33,11 @@ public class GameController : NetworkBehaviour
     
     private void OnPlayerConnected(NetworkSandbox sandbox, NetworkPlayer player)
     {
+        Debug.Log($"OnPlayerConnected {CurGameState}");
+        
         if (CurGameState >= GameState.Ready)
             return;
+        
         CurGameState = GameState.Ready;
         CurGameTime = _timeReadyToStart;
     }
@@ -47,6 +50,8 @@ public class GameController : NetworkBehaviour
     public override void NetworkFixedUpdate()
     {
         base.NetworkFixedUpdate();
+        
+        if (!IsServer) return;
         
         if (CurGameState == GameState.None) return;
         
